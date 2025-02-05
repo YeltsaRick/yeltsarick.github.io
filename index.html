@@ -1,1 +1,208 @@
-<h1>Hallo Welt!</h1>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schere, Stein, Papier, Echse, Spock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1f1f1f; /* Noch dunklerer Hintergrund */
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .game-container {
+      background-color: rgba(40, 40, 40, 0.95); /* Noch dunkleres Feld */
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+      text-align: center;
+      width: 900px; /* Breiteres Spielfeld */
+    }
+    .choices {
+      display: flex;
+      justify-content: space-around;
+      margin: 50px 0;
+    }
+    .choice-button {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: none;
+      background-color: #333; /* Dunklere Buttons */
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .choice-button:hover {
+      transform: scale(1.15);
+      background-color: #555; /* Heller beim Hover */
+    }
+    .result {
+      margin: 35px 0;
+      font-size: 26px;
+      font-weight: bold;
+    }
+    .description {
+      margin: 20px 0;
+      font-size: 20px;
+      color: #bbb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 14px;
+    }
+    th {
+      background-color: #333;
+      color: #fff;
+    }
+    .lobby {
+      margin-top: 40px;
+    }
+    .input-field {
+      padding: 12px;
+      margin-top: 12px;
+      width: calc(100% - 24px);
+      background-color: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    .btn {
+      padding: 15px 20px;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 12px;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    .btn:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Schere, Stein, Papier, Echse, Spock</h1>
+    <div class="choices">
+      <button class="choice-button" onclick="makeChoice('Schere')">Schere</button>
+      <button class="choice-button" onclick="makeChoice('Stein')">Stein</button>
+      <button class="choice-button" onclick="makeChoice('Papier')">Papier</button>
+      <button class="choice-button" onclick="makeChoice('Echse')">Echse</button>
+      <button class="choice-button" onclick="makeChoice('Spock')">Spock</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="description" id="description"></div>
+    <table>
+      <tr>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Draws</th>
+      </tr>
+      <tr>
+        <td id="wins">0</td>
+        <td id="losses">0</td>
+        <td id="draws">0</td>
+      </tr>
+    </table>
+    <div class="lobby">
+      <button class="btn" onclick="createLobby()">Lobby erstellen</button>
+      <input type="text" id="lobbyCodeInput" class="input-field" placeholder="Lobby-Code eingeben">
+      <button class="btn" onclick="joinLobby()">Lobby beitreten</button>
+      <p id="lobbyCode"></p>
+    </div>
+  </div>
+
+  <script>
+    const choices = {
+      'Schere': ['Papier', 'Echse'],
+      'Stein': ['Schere', 'Echse'],
+      'Papier': ['Stein', 'Spock'],
+      'Echse': ['Spock', 'Papier'],
+      'Spock': ['Schere', 'Stein']
+    };
+
+    const descriptions = {
+      'ScherePapier': 'Schere schneidet Papier',
+      'PapierStein': 'Papier bedeckt Stein',
+      'SteinEchse': 'Stein zerquetscht Echse',
+      'EchseSpock': 'Echse vergiftet Spock',
+      'SpockSchere': 'Spock zertrümmert Schere',
+      'SchereEchse': 'Schere köpft Echse',
+      'EchsePapier': 'Echse frisst Papier',
+      'PapierSpock': 'Papier widerlegt Spock',
+      'SpockStein': 'Spock verdampft Stein',
+      'SteinSchere': 'Stein schleift Schere'
+    };
+
+    let stats = { wins: 0, losses: 0, draws: 0 };
+    const lobbies = {};  // Lobby-Verwaltung
+
+    function getRandomChoice() {
+      const choiceKeys = Object.keys(choices);
+      return choiceKeys[Math.floor(Math.random() * choiceKeys.length)];
+    }
+
+    function makeChoice(playerChoice) {
+      const computerChoice = getRandomChoice();
+      let resultText = '';
+      let descriptionText = '';
+
+      if (playerChoice === computerChoice) {
+        resultText = 'Unentschieden!';
+        stats.draws++;
+      } else if (choices[playerChoice].includes(computerChoice)) {
+        resultText = `Du hast gewonnen!`;
+        stats.wins++;
+        descriptionText = descriptions[playerChoice + computerChoice];
+      } else {
+        resultText = `Du hast verloren!`;
+        stats.losses++;
+        descriptionText = descriptions[computerChoice + playerChoice];
+      }
+
+      document.getElementById('result').innerText = resultText;
+      document.getElementById('description').innerText = descriptionText;
+      document.getElementById('wins').innerText = stats.wins;
+      document.getElementById('losses').innerText = stats.losses;
+      document.getElementById('draws').innerText = stats.draws;
+    }
+
+    function createLobby() {
+      const code = Array.from({ length: 5 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
+      if (!lobbies[code]) {
+        lobbies[code] = { players: 1 };
+        document.getElementById('lobbyCode').innerText = `Lobby-Code: ${code}`;
+      } else {
+        document.getElementById('lobbyCode').innerText = 'Lobby bereits existiert, versuche es erneut!';
+      }
+    }
+
+    function joinLobby() {
+      const code = document.getElementById('lobbyCodeInput').value.toUpperCase();
+      if (lobbies[code]) {
+        if (lobbies[code].players < 2) {
+          lobbies[code].players++;
+          document.getElementById('lobbyCode').innerText = `Beigetreten zu Lobby: ${code}`;
+        } else {
+          document.getElementById('lobbyCode').innerText = 'Lobby ist voll!';
+        }
+      } else {
+        document.getElementById('lobbyCode').innerText = 'Lobby nicht gefunden!';
+      }
+    }
+
+  </script>
+</body>
+</html>
